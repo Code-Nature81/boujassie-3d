@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Add 3D terrain to a map</title>
+<meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+<link href="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.css" rel="stylesheet">
+<script src="https://api.mapbox.com/mapbox-gl-js/v2.2.0/mapbox-gl.js"></script>
+<style>
+body { margin: 0; padding: 0; }
+#map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+#info {
+display: inline-block;
+position: relative;
+margin: 0px auto;
+width: 20%;
+padding: 10px;
+border: none;
+border-radius: 3px;
+font-size: 12px;
+text-align: center;
+color: #222;
+background: #fff;
+}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<pre id="info"></pre>
+ 
+<script>
+	mapboxgl.accessToken = 'pk.eyJ1IjoiZ3ViaW5xIiwiYSI6ImNrbnlubnVwYjBsMjgyb3J4b3hqM2YwOGsifQ.KV-VZe4nIEMc7rhtHmM5BQ';
+var map = new mapboxgl.Map({
+container: 'map',
+zoom: 15.4,
+center: [2.156807,44.06817],
+pitch: 78,
+bearing: 200,
+style: 'mapbox://styles/mapbox-map-design/ckhqrf2tz0dt119ny6azh975y'
+});
+ 
+map.on('load', function () {
+map.addSource('mapbox-dem', {
+'type': 'raster-dem',
+'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+'tileSize': 400,
+'maxzoom': 14
+});
+// add the DEM source as a terrain layer with exaggerated height
+map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+ 
+// add a sky layer that will show when the map is highly pitched
+map.addLayer({
+'id': 'sky',
+'type': 'sky',
+'paint': {
+'sky-type': 'atmosphere',
+'sky-atmosphere-sun': [0.0, 0.0],
+'sky-atmosphere-sun-intensity': 15
+}
+});
+});
+
+map.on('load', function () {
+map.addSource('route', {
+'type': 'geojson',
+'data': {
+'type': 'Feature',
+'properties': {},
+'geometry': {
+'type': 'LineString',
+'coordinates': 
+[[2.161587,44.063128],[2.161109,44.06413],[2.160798,44.064739],[2.160761,44.06494],[2.160766,44.065676],[2.160369,44.065992],[2.159988,44.06657],[2.159795,44.067318],[2.159715,44.067387],[2.159066,44.067773],[2.158642,44.067858],[2.157553,44.068143],[2.156807,44.06817],[2.156104,44.068486],[2.155423,44.06891],[2.154849,44.069141],[2.154195,44.069453],[2.15369,44.069789],[2.153347,44.070112],[2.152779,44.070478],[2.151979,44.070987],[2.151282,44.071419],[2.150365,44.071901],[2.149533,44.071535],[2.148921,44.072244],[2.148659,44.072178],[2.148423,44.072047],[2.148385,44.071797],[2.148369,44.071662],[2.148423,44.071477],[2.148213,44.071303],[2.148567,44.070929],[2.148771,44.070633],[2.149013,44.070344],[2.149394,44.069993],[2.149919,44.069704],[2.150483,44.069249],[2.150708,44.06884],[2.150901,44.068413],[2.150783,44.068058],[2.151545,44.067938],[2.151647,44.067804],[2.152864,44.067642],[2.153589,44.067711],[2.154742,44.067784],[2.155654,44.067838],[2.156813,44.068162]]
+
+
+
+}
+}
+});
+map.addLayer({
+'id': 'route',
+'type': 'line',
+'source': 'route',
+'layout': {
+'line-join': 'round',
+'line-cap': 'round'
+},
+'paint': {
+'line-color': '#0000FF',
+'line-width': 5
+}
+});
+});
+
+map.addControl(
+new mapboxgl.GeolocateControl({
+positionOptions: {
+enableHighAccuracy: true
+},
+trackUserLocation: true
+})
+);
+
+map.on('mousemove', function (e) {
+document.getElementById('info').innerHTML =
+// e.point is the x, y coordinates of the mousemove event relative
+// to the top-left corner of the map
+JSON.stringify(e.point) +
+'<br />' +
+// e.lngLat is the longitude, latitude geographical position of the event
+JSON.stringify(e.lngLat.wrap());
+});
+
+map.addControl(new mapboxgl.NavigationControl());
+</script>
+ 
+</body>
+</html>
